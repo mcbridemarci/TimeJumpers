@@ -46,26 +46,55 @@ def findAll(keyword: str, dbWords: list[dict]) -> list[int]:
     #print("dbWords in findAll:", dbWords);
     print("finding '" + keyword + "'");
     for d in dbWords:
-        print("d['text']:", d['text']);
-        if d['text'].find(keyword) >= 0:
+        #print("d['text']:", d['text']);
+        if d['text'].lower().find(keyword) >= 0:
             r.append(d['start']);
     return r;
 
 # Create your views here.
 def index(request):
-    auth = "9ce7bcff260346dcb2810fa76023732b";
+    boolTestTranscription = False;
+    auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
     audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
-    transcriptID = "jixtkhcr6-0aba-4092-a235-db2744adfe04"; #default AssemblyAI input
-    #transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f"; #LectureIntro.mp4
     
-    #transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
-    print("transcriptID:", transcriptID);
+    #searchWord = "know";
+    #transcriptID = "jixtkhcr6-0aba-4092-a235-db2744adfe04"; #default AssemblyAI input
+    
+    #Hello everyone. How are you."
+    searchWord = "HOW".lower();
+    transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f"; #LectureIntro.mp4
+    
+    #if not boolTestTranscription, skip call to 'transcribe_assemblyai'
+    if boolTestTranscription:
+        transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
+    #print("transcriptID:", transcriptID);
     dbWords = query_transcript(transcriptID, auth); #list of dictionaries
     
     #return HttpResponse("Where can I upload, eh?<br>");
-    searchWord = "know";
     pos = findAll(searchWord, dbWords);
-    return HttpResponse("Where can I upload, eh?<br>" + str(dbWords) + "<br>" + searchWord + ": " + (str(pos) if pos else "(none)"));
+    print("searchWord, pos:", searchWord, pos);
+    
+    ##test:
+    #strHTML = "Where can I upload, eh?<br>" + str(dbWords) + "<br>";
+    #strHTML += searchWord + ": " + (str(pos) if pos else "(none)");
+    
+    #if keyword found
+    if pos:
+        #video position "currentTime" is in seconds (while findAll returns milliseconds)
+        strHTML = """<video id="vid1" width="750" height="563" controls="controls" autoplay="autoplay">
+                    <source src="{}" type="video/mp4">
+                    <object data="" width="1500" height="1125">
+                    <embed width="1500" height="1125" src="{}">
+                    </object>
+                    </video>
+                    <script>
+                        document.getElementById('vid1').currentTime = {};
+                    </script>""".format(audio_url, audio_url, float(pos[0])/float(1000) if pos else 0);
+    else:
+        strHTML = "Zero results found for keyword '{}'.".format(searchWord);
+    print("strHTML:", strHTML);
+    
+    return HttpResponse(strHTML);
     
     #transcribe_gcs_with_word_time_offsets("file:///Users/vdo/Desktop/lectureIntro.mov"); #"invalid GCS path"
     #transcribe_gcs_with_word_time_offsets("/Users/vdo/Desktop/lectureIntro.mov");
