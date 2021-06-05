@@ -19,5 +19,6 @@ from TimeJumpers_app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name="homepage")
+    path('', views.index, name="Homepage"),
+    path('timeJump/', views.timeJump, name="Query")
 ]

@@ -21,7 +21,7 @@ def transcribe_assemblyai(auth: str, audio_url: str): #9 dollars to process 10 h
 
     response = requests.post(endpoint, json=json, headers=headers)
 
-    print("JSON response:", response.json());
+    #print("JSON response:", response.json());
     return response.json();
 
 def query_transcript(transcriptID: str, auth: str):
@@ -37,14 +37,14 @@ def query_transcript(transcriptID: str, auth: str):
         
         #return response.json();
         dbWords = response.json()['words'];
-    print("query_transcript response:", response.json());
-    print("dbWords:", dbWords);
+    #print("query_transcript response:", response.json());
+    #print("dbWords:", dbWords);
     return dbWords;
     
 def findAll(keyword: str, dbWords: list[dict]) -> list[int]:
     r = [];
     #print("dbWords in findAll:", dbWords);
-    print("finding '" + keyword + "'");
+    #print("finding '" + keyword + "'");
     for d in dbWords:
         #print("d['text']:", d['text']);
         if d['text'].lower().find(keyword) >= 0:
@@ -53,30 +53,30 @@ def findAll(keyword: str, dbWords: list[dict]) -> list[int]:
 
 # Create your views here.
 def index(request):
+    
+    #strHTML = "<form action='timeJump/' method='POST'>Enter word to find:</br><input id='searchWord'><input type='submit' value='OK'></form>";
+
+    return render(request, 'index.html');
+    
+def timeJump(request):
+    #for key, value in request.POST.items():
+    #    print('Key: %s' % (key) )
+    #    print('Value %s' % (value) )
+        
+    searchWord = request.POST.get("searchWord", None).lower();
     boolTestTranscription = False;
     auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
     audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
     
-    #searchWord = "know";
-    #transcriptID = "jixtkhcr6-0aba-4092-a235-db2744adfe04"; #default AssemblyAI input
-    
-    #Hello everyone. How are you."
-    searchWord = "HOW".lower();
     transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f"; #LectureIntro.mp4
     
     #if not boolTestTranscription, skip call to 'transcribe_assemblyai'
     if boolTestTranscription:
         transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
-    #print("transcriptID:", transcriptID);
     dbWords = query_transcript(transcriptID, auth); #list of dictionaries
     
     #return HttpResponse("Where can I upload, eh?<br>");
     pos = findAll(searchWord, dbWords);
-    print("searchWord, pos:", searchWord, pos);
-    
-    ##test:
-    #strHTML = "Where can I upload, eh?<br>" + str(dbWords) + "<br>";
-    #strHTML += searchWord + ": " + (str(pos) if pos else "(none)");
     
     #if keyword found
     if pos:
@@ -92,7 +92,7 @@ def index(request):
                     </script>""".format(audio_url, audio_url, float(pos[0])/float(1000) if pos else 0);
     else:
         strHTML = "Zero results found for keyword '{}'.".format(searchWord);
-    print("strHTML:", strHTML);
+    #print("strHTML:", strHTML);
     
     return HttpResponse(strHTML);
     
