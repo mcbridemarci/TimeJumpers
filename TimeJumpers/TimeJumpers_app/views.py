@@ -37,14 +37,11 @@ def query_transcript(transcriptID: str, auth: str):
         
         #return response.json();
         dbWords = response.json()['words'];
-    #print("query_transcript response:", response.json());
-    #print("dbWords:", dbWords);
+    
     return dbWords;
     
 def findAll(keyword: str, dbWords: list[dict]) -> list[int]:
     r = [];
-    #print("dbWords in findAll:", dbWords);
-    #print("finding '" + keyword + "'");
     for d in dbWords:
         #print("d['text']:", d['text']);
         if d['text'].lower().find(keyword) >= 0:
@@ -53,16 +50,40 @@ def findAll(keyword: str, dbWords: list[dict]) -> list[int]:
 
 # Create your views here.
 def index(request):
-    
-    #strHTML = "<form action='timeJump/' method='POST'>Enter word to find:</br><input id='searchWord'><input type='submit' value='OK'></form>";
-
     return render(request, 'index.html');
     
-def timeJump(request):
-    #for key, value in request.POST.items():
-    #    print('Key: %s' % (key) )
-    #    print('Value %s' % (value) )
+def query_video(request):
+    
+    audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
+    context = { "videoURL": audio_url };
+    
+    if "searchWord" in request.POST:
+        searchWord = request.POST.get("searchWord", None).lower();
+        boolTestTranscription = False;
+        auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
         
+        transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f"; #LectureIntro.mp4
+        
+        #if boolTestTranscription, make call to 'transcribe_assemblyai'
+        if boolTestTranscription:
+            transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
+        #else: #reuse existing transcript
+        
+        dbWords = query_transcript(transcriptID, auth); #list of dictionaries; one per word
+        
+        #find all instances of searchWord
+        pos = findAll(searchWord, dbWords);
+        
+        context ["searchWord"] = searchWord;
+        context ["results"] = pos;
+        
+    #return HttpResponse("Where can I upload, eh?<br>");
+    
+    return render(request, 'query_video.html', context);
+    
+    
+def query_videoV1(request):
+    
     searchWord = request.POST.get("searchWord", None).lower();
     boolTestTranscription = False;
     auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
@@ -92,7 +113,6 @@ def timeJump(request):
                     </script>""".format(audio_url, audio_url, float(pos[0])/float(1000) if pos else 0);
     else:
         strHTML = "Zero results found for keyword '{}'.".format(searchWord);
-    #print("strHTML:", strHTML);
     
     return HttpResponse(strHTML);
     
