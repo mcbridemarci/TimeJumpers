@@ -1,11 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-import io, requests, json
-#dbWords = {};
+import io, requests, json, math;
 
 def transcribe_assemblyai(auth: str, audio_url: str): #9 dollars to process 10 hours of input
     endpoint = "https://api.assemblyai.com/v2/transcript"
-
+    
     #json = {
     #  "audio_url": "https://s3-us-west-2.amazonaws.com/blog.assemblyai.com/audio/8-7-2018-post/7510.mp3"
     #}
@@ -13,18 +12,18 @@ def transcribe_assemblyai(auth: str, audio_url: str): #9 dollars to process 10 h
     json = {
       "audio_url": audio_url
       }
-
+    
     headers = {
         "authorization": auth,
         "content-type": "application/json"
     }
-
+    
     response = requests.post(endpoint, json=json, headers=headers)
-
+    
     #print("JSON response:", response.json());
     return response.json();
-
-def query_transcript(transcriptID: str, auth: str):
+    
+def query_transcript(transcriptID: str, auth: str) -> dict:
     #sometimes returns OSError: [Errno 41] Protocol wrong type for socket
     #   in such cases, retry
     dbWords = None;
@@ -40,18 +39,40 @@ def query_transcript(transcriptID: str, auth: str):
     
     return dbWords;
     
-def findAll(keyword: str, dbWords: list[dict]) -> list[int]:
+#does not work for partial matches - I cannot anticipate every last keyword the crazy use might search!
+def map_word_to_times(dbWords: list[dict], context: int) -> dict:
+    #dbWords: list of dictionaries like "{'text': 'Hello,', 'confidence': 0.96, 'end': 600, 'start': 0}"
+    #r: list of dictionaries like "{'hello': [[0, 'Hello everyone how']]}"
+    r = {};
+    for i in range(0, len(dbWords)):
+        key = dbWords[i]['text'].lower();
+        if key not in r:
+            r[key] = [];
+        r[dbWords[i]['text']].append([dbWords[i]['start'], key, " ".join([dbWords[j]['text'] for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
+    return r;
+    
+def findAll(keyword: str, dbWords: list[dict], context: int) -> list[int]:
     r = [];
-    for d in dbWords:
-        #print("d['text']:", d['text']);
-        if d['text'].lower().find(keyword) >= 0:
-            r.append(d['start']);
+    for i in range(0, len(dbWords)):
+        if dbWords[i]['text'].lower().find(keyword) >= 0:
+            r.append([dbWords[i]['start'], " ".join([dbWords[j]['text'] for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
     return r;
 
-# Create your views here.
+#landing page
 def index(request):
     return render(request, 'index.html');
+
+def pad(strIn: str, strPad: str, iLen: int) -> str:
+    return "".join([strPad]*(iLen-len(strIn))) + strIn;
     
+def convertTimesToLinks(pos: list) -> None:
+    for i in range(0, len(pos)):
+        pos[i] = convertTimeToHuman(pos[i][0]) + ": '... " + pos[i][1] + " ...'";
+
+def convertTimeToHuman(iTimeMs: int) -> str:
+    return str(math.floor(iTimeMs/3600000)) + ":" + pad(str(math.floor((iTimeMs%3600000)/60000)), "0", 2) + ":" + pad(str(math.floor((iTimeMs%60000)/1000)), "0", 2);
+    
+#search page
 def query_video(request):
     
     audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
@@ -72,7 +93,10 @@ def query_video(request):
         dbWords = query_transcript(transcriptID, auth); #list of dictionaries; one per word
         
         #find all instances of searchWord
-        pos = findAll(searchWord, dbWords);
+        pos = findAll(searchWord, dbWords, 2);
+        print("test1:", pos);
+        convertTimesToLinks(pos);
+        print("test2:", pos);
         
         context ["searchWord"] = searchWord;
         context ["results"] = pos;
@@ -81,7 +105,7 @@ def query_video(request):
     
     return render(request, 'query_video.html', context);
     
-    
+#display video queued to desired time
 def query_videoV1(request):
     
     searchWord = request.POST.get("searchWord", None).lower();
