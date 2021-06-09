@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 import io, requests, json, math;
 
+#retrieve new transcription of specified audio file
 def transcribe_assemblyai(auth: str, audio_url: str): #9 dollars to process 10 hours of input
     endpoint = "https://api.assemblyai.com/v2/transcript"
     
@@ -23,6 +24,7 @@ def transcribe_assemblyai(auth: str, audio_url: str): #9 dollars to process 10 h
     #print("JSON response:", response.json());
     return response.json();
     
+#retrieve existing transcript
 def query_transcript(transcriptID: str, auth: str) -> dict:
     #sometimes returns OSError: [Errno 41] Protocol wrong type for socket
     #   in such cases, retry
@@ -51,24 +53,28 @@ def map_word_to_times(dbWords: list[dict], context: int) -> dict:
         r[dbWords[i]['text']].append([dbWords[i]['start'], key, " ".join([dbWords[j]['text'] for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
     return r;
     
+#scan trancript for given keyword; return times where found, and surrounding words for context
 def findAll(keyword: str, dbWords: list[dict], context: int) -> list[int]:
     r = [];
     for i in range(0, len(dbWords)):
         if dbWords[i]['text'].lower().find(keyword) >= 0:
-            r.append([dbWords[i]['start'], " ".join([dbWords[j]['text'] for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
+            r.append([dbWords[i]['start'], " ".join([("{}" if j!=i else "<strong>{}</strong>").format(dbWords[j]['text']) for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
     return r;
 
 #landing page
 def index(request):
     return render(request, 'index.html');
 
+#pad strIn with as many copies of strPad as is required to reach a length of iLen
 def pad(strIn: str, strPad: str, iLen: int) -> str:
     return "".join([strPad]*(iLen-len(strIn))) + strIn;
-    
+
+#prepare links for search results
 def convertTimesToLinks(pos: list) -> None:
     for i in range(0, len(pos)):
-        pos[i] = convertTimeToHuman(pos[i][0]) + ": '... " + pos[i][1] + " ...'";
+        pos[i] = "<a href='.'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
 
+#convert time from milliseconds to human-readable (HH:MM:SS)
 def convertTimeToHuman(iTimeMs: int) -> str:
     return str(math.floor(iTimeMs/3600000)) + ":" + pad(str(math.floor((iTimeMs%3600000)/60000)), "0", 2) + ":" + pad(str(math.floor((iTimeMs%60000)/1000)), "0", 2);
     
@@ -94,9 +100,7 @@ def query_video(request):
         
         #find all instances of searchWord
         pos = findAll(searchWord, dbWords, 2);
-        print("test1:", pos);
         convertTimesToLinks(pos);
-        print("test2:", pos);
         
         context ["searchWord"] = searchWord;
         context ["results"] = pos;
