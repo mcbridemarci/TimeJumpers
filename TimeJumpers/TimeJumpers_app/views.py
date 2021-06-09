@@ -72,7 +72,8 @@ def pad(strIn: str, strPad: str, iLen: int) -> str:
 #prepare links for search results
 def convertTimesToLinks(pos: list) -> None:
     for i in range(0, len(pos)):
-        pos[i] = "<a href='.'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
+        #pos[i] = "<a href='.'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
+        pos[i] = "<a href='javascript:setVideoTime(" + str(float(pos[i][0])/float(1000)) + ")'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
 
 #convert time from milliseconds to human-readable (HH:MM:SS)
 def convertTimeToHuman(iTimeMs: int) -> str:
