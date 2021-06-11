@@ -1,14 +1,32 @@
 from django.shortcuts import render;
 from django.http import HttpResponse;
 from TimeJumpers_app.models import Video;
-import io, requests, json, math;
+import io, requests, json, math, random;
 
+#test jumping to a random point in the video
+def testTimeJump(request):
+    
+    audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
+    
+    #video position "currentTime" is in seconds (while findAll returns milliseconds)
+    strHTML = """<video id="vid1" width="750" height="563" controls="controls" autoplay="autoplay">
+                <source src="{}" type="video/mp4">
+                <object data="" width="1500" height="1125">
+                <embed width="1500" height="1125" src="{}">
+                </object>
+                </video>
+                <script>
+                    document.getElementById('vid1').currentTime = {};
+                </script>""".format(audio_url, audio_url, random.randint(0,5));
+                
+    return HttpResponse(strHTML);
+
+#test writing to the database
 def testDBWrite(request):
     p = Video(location="https://storage.googleapis.com/49783_input/LectureIntro.mp4", transcriptID="jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f");
     p.save();
     return render(request, 'home.html');
     
-
 #retrieve new transcription of specified audio file
 def transcribe_assemblyai(auth: str, audio_url: str): #9 dollars to process 10 hours of input
     endpoint = "https://api.assemblyai.com/v2/transcript";

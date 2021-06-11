@@ -23,4 +23,5 @@ urlpatterns = [
     path('specify/', views.specify, name="Specify"),
     path('query/', views.query_video, name="Query"),
     path('testDBWrite/', views.testDBWrite, name="testDBWrite"),
+    path('testTimeJump/', views.testTimeJump, name="testTimeJump"),
 ]
