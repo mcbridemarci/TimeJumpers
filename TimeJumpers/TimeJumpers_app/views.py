@@ -63,7 +63,14 @@ def findAll(keyword: str, dbWords: list[dict], context: int) -> list[int]:
 
 #landing page
 def index(request):
-    return render(request, 'index.html');
+    return render(request, 'home.html');
+    #return render(request, 'index.html');
+
+#landing page
+def specify(request):
+    print("running specify...");
+    return render(request, 'specify_video.html');
+    #return render(request, 'index.html');
 
 #pad strIn with as many copies of strPad as is required to reach a length of iLen
 def pad(strIn: str, strPad: str, iLen: int) -> str:
@@ -72,17 +79,19 @@ def pad(strIn: str, strPad: str, iLen: int) -> str:
 #prepare links for search results
 def convertTimesToLinks(pos: list) -> None:
     for i in range(0, len(pos)):
+        #to enable navigation, use the second line from here:
         #pos[i] = "<a href='.'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
         pos[i] = "<a href='javascript:setVideoTime(" + str(float(pos[i][0])/float(1000)) + ")'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
 
 #convert time from milliseconds to human-readable (HH:MM:SS)
 def convertTimeToHuman(iTimeMs: int) -> str:
     return str(math.floor(iTimeMs/3600000)) + ":" + pad(str(math.floor((iTimeMs%3600000)/60000)), "0", 2) + ":" + pad(str(math.floor((iTimeMs%60000)/1000)), "0", 2);
-    
+
 #search page
 def query_video(request):
     
-    audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
+    #audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
+    audio_url = request.POST.get("videoURL", None);
     context = { "videoURL": audio_url };
     
     if "searchWord" in request.POST:
@@ -116,7 +125,7 @@ def query_videoV1(request):
     searchWord = request.POST.get("searchWord", None).lower();
     boolTestTranscription = False;
     auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
-    audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
+    #audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
     
     transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f"; #LectureIntro.mp4
     
