@@ -1,10 +1,17 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.shortcuts import render;
+from django.http import HttpResponse;
+from TimeJumpers_app.models import Video;
 import io, requests, json, math;
+
+def testDBWrite(request):
+    p = Video(location="https://storage.googleapis.com/49783_input/LectureIntro.mp4", transcriptID="jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f");
+    p.save();
+    return render(request, 'home.html');
+    
 
 #retrieve new transcription of specified audio file
 def transcribe_assemblyai(auth: str, audio_url: str): #9 dollars to process 10 hours of input
-    endpoint = "https://api.assemblyai.com/v2/transcript"
+    endpoint = "https://api.assemblyai.com/v2/transcript";
     
     #json = {
     #  "audio_url": "https://s3-us-west-2.amazonaws.com/blog.assemblyai.com/audio/8-7-2018-post/7510.mp3"
@@ -12,14 +19,14 @@ def transcribe_assemblyai(auth: str, audio_url: str): #9 dollars to process 10 h
     
     json = {
       "audio_url": audio_url
-      }
+      };
     
     headers = {
         "authorization": auth,
         "content-type": "application/json"
-    }
+    };
     
-    response = requests.post(endpoint, json=json, headers=headers)
+    response = requests.post(endpoint, json=json, headers=headers);
     
     #print("JSON response:", response.json());
     return response.json();
