@@ -99,12 +99,12 @@ def query_video(request):
         boolTestTranscription = False;
         auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
         
-        transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f"; #LectureIntro.mp4
-        
-        #if boolTestTranscription, make call to 'transcribe_assemblyai'
-        if boolTestTranscription:
+        transcriptID = "";
+        #if repeating analysis for LectureIntro.mp4
+        if audio_url == "https://storage.googleapis.com/49783_input/LectureIntro.mp4":
+            transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f";
+        else: #perform new analysis
             transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
-        #else: #reuse existing transcript
         
         dbWords = query_transcript(transcriptID, auth); #list of dictionaries; one per word
         
