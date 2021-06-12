@@ -3,7 +3,11 @@ from django.http import HttpResponse;
 from TimeJumpers_app.models import Video;
 import io, requests, json, math, random;
 
-#test jumping to a random point in the video
+#POC: playing a video stored locally
+def testLocalVideo(request):
+    return render(request, 'playLocalVideo.html');
+
+#POC: test jumping to a random point in the video
 def testTimeJump(request):
     
     audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
@@ -21,7 +25,7 @@ def testTimeJump(request):
                 
     return HttpResponse(strHTML);
 
-#test writing to the database
+#POC: test writing to the database
 def testDBWrite(request):
     p = Video(location="https://storage.googleapis.com/49783_input/LectureIntro.mp4", transcriptID="jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f");
     p.save();
@@ -105,8 +109,8 @@ def pad(strIn: str, strPad: str, iLen: int) -> str:
 def convertTimesToLinks(pos: list) -> None:
     for i in range(0, len(pos)):
         #to enable navigation, use the second line from here:
-        #pos[i] = "<a href='.'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
-        pos[i] = "<a href='javascript:setVideoTime(" + str(float(pos[i][0])/float(1000)) + ")'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
+        pos[i] = "<a href='.'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
+        #pos[i] = "<a href='javascript:setVideoTime(" + str(float(pos[i][0])/float(1000)) + ")'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
 
 #convert time from milliseconds to human-readable (HH:MM:SS)
 def convertTimeToHuman(iTimeMs: int) -> str:
