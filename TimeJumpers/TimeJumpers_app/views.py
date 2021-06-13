@@ -9,8 +9,10 @@ def testLocalVideo(request):
 
 #POC: test jumping to a random point in the video
 def testTimeJump(request):
-    
+    #http://127.0.0.1:8000/testTimeJump/?time=4
     audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
+    time = request.GET.get("time");
+    time = int(time) if time else random.randint(0,4);
     
     #video position "currentTime" is in seconds (while findAll returns milliseconds)
     strHTML = """<video id="vid1" width="750" height="563" controls="controls" autoplay="autoplay">
@@ -21,7 +23,7 @@ def testTimeJump(request):
                 </video>
                 <script>
                     document.getElementById('vid1').currentTime = {};
-                </script>""".format(audio_url, audio_url, random.randint(0,5));
+                </script>""".format(audio_url, audio_url, time);
                 
     return HttpResponse(strHTML);
 
