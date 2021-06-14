@@ -52,7 +52,6 @@ def transcribe_assemblyai(auth: str, audio_url: str): #9 dollars to process 10 h
     
     response = requests.post(endpoint, json=json, headers=headers);
     
-    #print("JSON response:", response.json());
     return response.json();
     
 #retrieve existing transcript
@@ -99,7 +98,6 @@ def index(request):
 
 #landing page
 def specify(request):
-    print("running specify...");
     return render(request, 'specify_video.html');
     #return render(request, 'index.html');
 
@@ -136,6 +134,7 @@ def query_video(request):
             transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f";
         else: #perform new analysis
             transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
+            print("Transcript ID:", transcriptID);
         
         dbWords = query_transcript(transcriptID, auth); #list of dictionaries; one per word
         
