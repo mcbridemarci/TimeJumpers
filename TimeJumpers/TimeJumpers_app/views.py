@@ -87,14 +87,6 @@ def map_word_to_times(dbWords: list[dict], context: int) -> dict:
     return r;
     
 #scan trancript for given keyword; return times where found, and surrounding words for context
-def findAllV1(keyword: str, dbWords: list[dict], context: int) -> list[int]:
-    r = [];
-    for i in range(0, len(dbWords)):
-        if dbWords[i]['text'].lower().find(keyword) >= 0:
-            r.append([dbWords[i]['start'], " ".join([("{}" if j!=i else "<strong>{}</strong>").format(dbWords[j]['text']) for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
-    return r;
-    
-#scan trancript for given keyword; return times where found, and surrounding words for context
 def findAll(searchword: str, dbWordToTimes: dict) -> list[int]:
     r = [];
     searchword = searchword.lower();
@@ -165,37 +157,45 @@ def query_video(request):
         
     return render(request, 'query_video.html', context);
     
-#display video queued to desired time
-def query_videoV1(request):
-    
-    searchWord = request.POST.get("searchWord", None).lower();
-    boolTestTranscription = False;
-    auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
-    #audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
-    
-    transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f"; #LectureIntro.mp4
-    
-    #if not boolTestTranscription, skip call to 'transcribe_assemblyai'
-    if boolTestTranscription:
-        transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
-    dbWords = query_transcript(transcriptID, auth); #list of dictionaries
-    
-    #return HttpResponse("Where can I upload, eh?<br>");
-    pos = findAllV1(searchWord, dbWords);
-    
-    #if keyword found
-    if pos:
-        #video position "currentTime" is in seconds (while findAll returns milliseconds)
-        strHTML = """<video id="vid1" width="750" height="563" controls="controls" autoplay="autoplay">
-                    <source src="{}" type="video/mp4">
-                    <object data="" width="1500" height="1125">
-                    <embed width="1500" height="1125" src="{}">
-                    </object>
-                    </video>
-                    <script>
-                        document.getElementById('vid1').currentTime = {};
-                    </script>""".format(audio_url, audio_url, float(pos[0])/float(1000) if pos else 0);
-    else:
-        strHTML = "Zero results found for keyword '{}'.".format(searchWord);
-    
-    return HttpResponse(strHTML);
+##display video queued to desired time
+#def query_videoV1(request):
+#
+#    searchWord = request.POST.get("searchWord", None).lower();
+#    boolTestTranscription = False;
+#    auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
+#    #audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
+#
+#    transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f"; #LectureIntro.mp4
+#
+#    #if not boolTestTranscription, skip call to 'transcribe_assemblyai'
+#    if boolTestTranscription:
+#        transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
+#    dbWords = query_transcript(transcriptID, auth); #list of dictionaries
+#
+#    #return HttpResponse("Where can I upload, eh?<br>");
+#    pos = findAllV1(searchWord, dbWords);
+#
+#    #if keyword found
+#    if pos:
+#        #video position "currentTime" is in seconds (while findAll returns milliseconds)
+#        strHTML = """<video id="vid1" width="750" height="563" controls="controls" autoplay="autoplay">
+#                    <source src="{}" type="video/mp4">
+#                    <object data="" width="1500" height="1125">
+#                    <embed width="1500" height="1125" src="{}">
+#                    </object>
+#                    </video>
+#                    <script>
+#                        document.getElementById('vid1').currentTime = {};
+#                    </script>""".format(audio_url, audio_url, float(pos[0])/float(1000) if pos else 0);
+#    else:
+#        strHTML = "Zero results found for keyword '{}'.".format(searchWord);
+#
+#    return HttpResponse(strHTML);
+#
+##scan trancript for given keyword; return times where found, and surrounding words for context
+#def findAllV1(keyword: str, dbWords: list[dict], context: int) -> list[int]:
+#    r = [];
+#    for i in range(0, len(dbWords)):
+#        if dbWords[i]['text'].lower().find(keyword) >= 0:
+#            r.append([dbWords[i]['start'], " ".join([("{}" if j!=i else "<strong>{}</strong>").format(dbWords[j]['text']) for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
+#    return r;
