@@ -2,6 +2,8 @@ from django.shortcuts import render;
 from django.http import HttpResponse;
 from TimeJumpers_app.models import Video;
 import io, requests, json, math, random;
+currentAudio = "";
+dbWordToTimes = {};
 
 #POC: playing a video stored locally
 def testLocalVideo(request):
@@ -77,18 +79,30 @@ def map_word_to_times(dbWords: list[dict], context: int) -> dict:
     #r: list of dictionaries like "{'hello': [[0, 'Hello everyone how']]}"
     r = {};
     for i in range(0, len(dbWords)):
-        key = dbWords[i]['text'].lower();
+        key = ''.join(filter(str.isalnum, dbWords[i]['text'])).lower();
         if key not in r:
             r[key] = [];
-        r[dbWords[i]['text']].append([dbWords[i]['start'], key, " ".join([dbWords[j]['text'] for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
+        r[key].append([dbWords[i]['start'], " ".join([("{}" if j!=i else "<strong>{}</strong>").format(dbWords[j]['text']) for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
+        #r[key].append([dbWords[i]['start'], " ".join([dbWords[j]['text'] for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
     return r;
     
 #scan trancript for given keyword; return times where found, and surrounding words for context
-def findAll(keyword: str, dbWords: list[dict], context: int) -> list[int]:
+def findAllV1(keyword: str, dbWords: list[dict], context: int) -> list[int]:
     r = [];
     for i in range(0, len(dbWords)):
         if dbWords[i]['text'].lower().find(keyword) >= 0:
             r.append([dbWords[i]['start'], " ".join([("{}" if j!=i else "<strong>{}</strong>").format(dbWords[j]['text']) for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
+    return r;
+    
+#scan trancript for given keyword; return times where found, and surrounding words for context
+def findAll(searchword: str, dbWordToTimes: dict) -> list[int]:
+    r = [];
+    searchword = searchword.lower();
+    for key in dbWordToTimes.keys():
+        if key.find(searchword) >= 0:
+            #append time and context of occurrence
+            r += dbWordToTimes[key];
+            
     return r;
 
 #landing page
@@ -119,34 +133,36 @@ def convertTimeToHuman(iTimeMs: int) -> str:
 #search page
 def query_video(request):
     
+    global dbWordToTimes;
+    
     #audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
     audio_url = request.POST.get("videoURL", None);
     context = { "videoURL": audio_url };
-    
-    if "searchWord" in request.POST:
+            
+    if "searchWord" in request.POST: #no need to query transcription as we already have it in memory
         searchWord = request.POST.get("searchWord", None).lower();
-        boolTestTranscription = False;
-        auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
-        
-        transcriptID = "";
-        #if repeating analysis for LectureIntro.mp4
-        if audio_url == "https://storage.googleapis.com/49783_input/LectureIntro.mp4":
-            transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f";
-        else: #perform new analysis
-            transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
-            print("Transcript ID:", transcriptID);
-        
-        dbWords = query_transcript(transcriptID, auth); #list of dictionaries; one per word
         
         #find all instances of searchWord
-        pos = findAll(searchWord, dbWords, 2);
+        pos = findAll(searchWord, dbWordToTimes);
         convertTimesToLinks(pos);
         
         context ["searchWord"] = searchWord;
         context ["results"] = pos;
+    else: #query that transcription and keep it for later
+        auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
+        transcriptID = "";
         
-    #return HttpResponse("Where can I upload, eh?<br>");
-    
+        #if repeating analysis for LectureIntro.mp4
+        if audio_url == "https://storage.googleapis.com/49783_input/LectureIntro.mp4":
+            transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f";
+            
+        else: #perform new analysis
+            transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
+            print("Transcript ID:", transcriptID);
+            
+        dbWords = query_transcript(transcriptID, auth); #list of dictionaries; one per word
+        dbWordToTimes = map_word_to_times(dbWords, 2);
+        
     return render(request, 'query_video.html', context);
     
 #display video queued to desired time
@@ -165,7 +181,7 @@ def query_videoV1(request):
     dbWords = query_transcript(transcriptID, auth); #list of dictionaries
     
     #return HttpResponse("Where can I upload, eh?<br>");
-    pos = findAll(searchWord, dbWords);
+    pos = findAllV1(searchWord, dbWords);
     
     #if keyword found
     if pos:
@@ -183,11 +199,3 @@ def query_videoV1(request):
         strHTML = "Zero results found for keyword '{}'.".format(searchWord);
     
     return HttpResponse(strHTML);
-    
-    #transcribe_gcs_with_word_time_offsets("file:///Users/vdo/Desktop/lectureIntro.mov"); #"invalid GCS path"
-    #transcribe_gcs_with_word_time_offsets("/Users/vdo/Desktop/lectureIntro.mov");
-    #transcribe_gcs_with_word_time_offsets("gs://49783_input/LectureIntrd.mp4"); #fileNotFound error
-    #transcribe_gcs_with_word_time_offsets("gs://49783_input/LectureIntro.mp4"); #empty output
-    #transcribe_gcs_with_word_time_offsets("gs://49783_input/enunciate.mp4"); #empty output
-    #transcribe_gcs_with_word_time_offsets("gs://49783_input/audiu.raw"); #404 No such object - so, at least the above lines are finding the input!
-    #transcribe_assemblyai();
