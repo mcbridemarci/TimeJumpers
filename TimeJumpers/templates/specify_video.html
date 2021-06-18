@@ -1,0 +1,13 @@
+<!-- bring in search results in a model -->
+<!DOCTYPE html>
+<head>
+    <title>Specify</title>
+</head>
+<body>
+    <form action='../query/' method='POST'>
+        {% csrf_token %}
+        <label for='videoURL'>Enter URL of public video:</label></br>
+        <input id='videoURL' type='text' name='videoURL'><input type='submit' value='Confirm'>
+    </form>
+</body>
+</html>

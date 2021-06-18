@@ -1,0 +1,45 @@
+<!-- bring in search results in a model -->
+<!DOCTYPE html>
+<head>
+    <title>Query</title>
+</head>
+<body>
+    <!-- render video, queued up by JavaScript, here -->
+    <video id="vid1" width="750" height="563" controls="controls" autoplay="autoplay">
+        <source src="{{ videoURL }}" type="video/mp4">
+        <object data="" width="1500" height="1125">
+        <embed width="1500" height="1125" src="{{ videoURL }}">
+        </object>
+    </video>
+    <script>
+        document.getElementById('vid1').currentTime = 0;
+    </script>
+    <form action='.' method='POST'>
+        {% csrf_token %}
+        <input type="hidden" id="videoURL" name="videoURL" value="{{ videoURL }}">
+        <label for='searchWord'>Enter word to find:</label></br>
+        <input id='searchWord' type='text' name='searchWord' value='{{ searchWord }}'><input type='submit' value='Search'>
+    </form>
+    
+    <!-- render search results, triggering JavaScript, down here -->
+    {% if searchWord %}
+        Results:
+        {% if results %}
+            {% for position in results %}
+                <!--<li>position[0]: position[1]</li>-->
+                <li>{{position|safe}}</li>
+            {% endfor %}
+        {% else %}
+            <li>No results found for <strong>'{{ searchWord }}'</strong></li>
+        {% endif %}
+    {% endif %}
+    
+</body>
+<script>
+    function setVideoTime(start){
+        vid = document.getElementById('vid1')
+        vid.currentTime = start;
+        vid.play(); //sometimes causes errors
+    }
+</script>
+</html>
