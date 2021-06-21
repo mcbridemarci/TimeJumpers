@@ -99,14 +99,14 @@ def findAll(searchword: str, dbWordToTimes: dict) -> list[int]:
 
 #landing page
 def index(request):
-    return render(request, 'home.html');
-    #return render(request, 'index.html');
+    return render(request, 'index.html');
 
 #landing page
 def specify(request):
-    return render(request, 'specify_video.html');
-    #return render(request, 'index.html');
-
+    context = { };
+    context ["existing_videos"] = Video.objects.all();
+    return render(request, 'specify_video.html', context);
+    
 #pad strIn with as many copies of strPad as is required to reach a length of iLen
 def pad(strIn: str, strPad: str, iLen: int) -> str:
     return "".join([strPad]*(iLen-len(strIn))) + strIn;
@@ -115,8 +115,8 @@ def pad(strIn: str, strPad: str, iLen: int) -> str:
 def convertTimesToLinks(pos: list) -> None:
     for i in range(0, len(pos)):
         #to enable navigation, use the second line from here:
-        pos[i] = "<a href='.'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
-        #pos[i] = "<a href='javascript:setVideoTime(" + str(float(pos[i][0])/float(1000)) + ")'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
+        #pos[i] = "<a href='.'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
+        pos[i] = "<a href='javascript:setVideoTime(" + str(float(pos[i][0])/float(1000)) + ")'>" + convertTimeToHuman(pos[i][0]) + "</a>: '... " + pos[i][1] + " ...'";
 
 #convert time from milliseconds to human-readable (HH:MM:SS)
 def convertTimeToHuman(iTimeMs: int) -> str:
@@ -126,13 +126,12 @@ def convertTimeToHuman(iTimeMs: int) -> str:
 def query_video(request):
     
     global dbWordToTimes;
+    context = {}; #container to send data to the view
+    audio_url = "";
     
-    #audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
-    audio_url = request.POST.get("videoURL", None);
-    context = { "videoURL": audio_url };
-            
     if "searchWord" in request.POST: #no need to query transcription as we already have it in memory
         searchWord = request.POST.get("searchWord", None).lower();
+        audio_url = request.POST.get("videoURL", None);
         
         #find all instances of searchWord
         pos = findAll(searchWord, dbWordToTimes);
@@ -140,62 +139,21 @@ def query_video(request):
         
         context ["searchWord"] = searchWord;
         context ["results"] = pos;
-    else: #query that transcription and keep it for later
-        auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
-        transcriptID = "";
         
-        #if repeating analysis for LectureIntro.mp4
-        if audio_url == "https://storage.googleapis.com/49783_input/LectureIntro.mp4":
-            transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f";
-            
-        else: #perform new analysis
+    else: #generate a transcript and keep it for later
+        auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
+        
+        if "existing" in request.POST:
+            transcriptID = request.POST.get("existing", None);
+            audio_url = Video.objects.get(transcriptID = transcriptID).location;
+        else: #proceed as if this is a new URL
+            audio_url = request.POST.get("videoURL", None);
             transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
             print("Transcript ID:", transcriptID);
             
         dbWords = query_transcript(transcriptID, auth); #list of dictionaries; one per word
         dbWordToTimes = map_word_to_times(dbWords, 2);
         
+    context["videoURL"] = audio_url;
+        
     return render(request, 'query_video.html', context);
-    
-##display video queued to desired time
-#def query_videoV1(request):
-#
-#    searchWord = request.POST.get("searchWord", None).lower();
-#    boolTestTranscription = False;
-#    auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
-#    #audio_url = "https://storage.googleapis.com/49783_input/LectureIntro.mp4";
-#
-#    transcriptID = "jilog6fau-2d87-4ad4-a8d3-fd795ee4d06f"; #LectureIntro.mp4
-#
-#    #if not boolTestTranscription, skip call to 'transcribe_assemblyai'
-#    if boolTestTranscription:
-#        transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
-#    dbWords = query_transcript(transcriptID, auth); #list of dictionaries
-#
-#    #return HttpResponse("Where can I upload, eh?<br>");
-#    pos = findAllV1(searchWord, dbWords);
-#
-#    #if keyword found
-#    if pos:
-#        #video position "currentTime" is in seconds (while findAll returns milliseconds)
-#        strHTML = """<video id="vid1" width="750" height="563" controls="controls" autoplay="autoplay">
-#                    <source src="{}" type="video/mp4">
-#                    <object data="" width="1500" height="1125">
-#                    <embed width="1500" height="1125" src="{}">
-#                    </object>
-#                    </video>
-#                    <script>
-#                        document.getElementById('vid1').currentTime = {};
-#                    </script>""".format(audio_url, audio_url, float(pos[0])/float(1000) if pos else 0);
-#    else:
-#        strHTML = "Zero results found for keyword '{}'.".format(searchWord);
-#
-#    return HttpResponse(strHTML);
-#
-##scan trancript for given keyword; return times where found, and surrounding words for context
-#def findAllV1(keyword: str, dbWords: list[dict], context: int) -> list[int]:
-#    r = [];
-#    for i in range(0, len(dbWords)):
-#        if dbWords[i]['text'].lower().find(keyword) >= 0:
-#            r.append([dbWords[i]['start'], " ".join([("{}" if j!=i else "<strong>{}</strong>").format(dbWords[j]['text']) for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
-#    return r;

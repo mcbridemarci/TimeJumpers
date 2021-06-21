@@ -4,10 +4,24 @@
     <title>Specify</title>
 </head>
 <body>
+    Specify previous video: <br/>
     <form action='../query/' method='POST'>
         {% csrf_token %}
+        <select class="combo" name="existing">
+            <option value="" selected="true">Please Select</option>
+            {% for v in existing_videos %}
+                <option value="{{v.transcriptID}}">{{v.location}}</option>
+            {% endfor %}
+        </select><br/>
+        <br/>
+        - OR -<br/>
+        <br/>
         <label for='videoURL'>Enter URL of public video:</label></br>
-        <input id='videoURL' type='text' name='videoURL'><input type='submit' value='Confirm'>
+        <input id='videoURL' type='text' name='videoURL'></br>
+        </br>
+        </br>
+        </br>
+        <input type='submit' value='Confirm'>
     </form>
 </body>
 </html>
