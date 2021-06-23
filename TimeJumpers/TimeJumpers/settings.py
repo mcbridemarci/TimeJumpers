@@ -91,7 +91,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'timejumper',
         'USER': 'postgres',
-        'PASSWORD': '***', #do not put this password on GitHub!
+        'PASSWORD': 'postgres', #do not put this password on GitHub!
         'HOST': 'timejumpers.cdfbjmjoumet.us-east-1.rds.amazonaws.com',
         'PORT': '5432',
     }

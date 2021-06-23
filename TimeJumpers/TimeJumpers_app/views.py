@@ -5,10 +5,6 @@ import io, requests, json, math, random;
 currentAudio = "";
 dbWordToTimes = {};
 
-#POC: playing a video stored locally
-def testLocalVideo(request):
-    return render(request, 'playLocalVideo.html');
-
 #POC: test jumping to a random point in the video
 def testTimeJump(request):
     #http://127.0.0.1:8000/testTimeJump/?time=4
@@ -65,11 +61,14 @@ def query_transcript(transcriptID: str, auth: str) -> dict:
     headers = {
         "authorization": auth,
     };
+    import datetime, time;
     while not dbWords:
         response = requests.get(endpoint, headers=headers);
         
         #return response.json();
         dbWords = response.json()['words'];
+        if not dbWords:
+            time.sleep(5);
     
     return dbWords;
     
@@ -122,16 +121,48 @@ def convertTimesToLinks(pos: list) -> None:
 def convertTimeToHuman(iTimeMs: int) -> str:
     return str(math.floor(iTimeMs/3600000)) + ":" + pad(str(math.floor((iTimeMs%3600000)/60000)), "0", 2) + ":" + pad(str(math.floor((iTimeMs%60000)/1000)), "0", 2);
 
+#POC: analyzing a video stored locally
+def read_file(input, chunk_size=5242880):
+    with input as _file:
+        while True:
+            data = _file.read(chunk_size)
+            if not data:
+                break
+            yield data
+
+#POC: analyzing a video stored locally
+def testLocalVideo(request):
+    audio_local = '/Users/vdo/Documents/Jeffrey/CMU/Courses/2021T2/49783/project/testData/LectureIntro.mp4';
+    auth = getAuth();
+    headers = {'authorization': auth};
+    response = requests.post('https://api.assemblyai.com/v2/upload',
+                         headers=headers,
+                         data=read_file(audio_local));
+    print(response.json()); #{'upload_url': 'https://cdn.assemblyai.com/upload/d81401ab-87c6-4d4d-a22f-b8a664aa3f8c'}
+    return render(request, 'playLocalVideo.html', {'json': response.json()});
+    
+def getAuth():
+    return "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
+
+def upload_assemblyai(input):
+    auth = getAuth();
+    print("uploading...");
+    headers = {'authorization': auth};
+    response = requests.post('https://api.assemblyai.com/v2/upload',
+                         headers=headers,
+                         data=read_file(input));
+    return response.json();
+    
 #search page
 def query_video(request):
     
     global dbWordToTimes;
     context = {}; #container to send data to the view
-    audio_url = "";
+    audio_location = "";
     
     if "searchWord" in request.POST: #no need to query transcription as we already have it in memory
         searchWord = request.POST.get("searchWord", None).lower();
-        audio_url = request.POST.get("videoURL", None);
+        audio_location = request.POST.get("videoURL", None);
         
         #find all instances of searchWord
         pos = findAll(searchWord, dbWordToTimes);
@@ -141,19 +172,50 @@ def query_video(request):
         context ["results"] = pos;
         
     else: #generate a transcript and keep it for later
-        auth = "9ce7bcff260346dcb2810fa76023732b"; #Jeffrey's personal account; 5 hr/month limit
+        auth = getAuth();
         
-        if "existing" in request.POST:
-            transcriptID = request.POST.get("existing", None);
-            audio_url = Video.objects.get(transcriptID = transcriptID).location;
-        else: #proceed as if this is a new URL
-            audio_url = request.POST.get("videoURL", None);
-            transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
-            print("Transcript ID:", transcriptID);
+        transcriptID = request.POST.get("existing", None);
+        if transcriptID: #user selected saved transcript
+            audio_location = Video.objects.get(transcriptID = transcriptID).location;
+        else: #proceed as if this is a new video
+            audio_location = request.POST.get("videoLocation", None);
+            audio_url = "";
+            #if video not hosted at a public URL
+            if not audio_location: #put it somewhere that AssemblyAI can find it
+                context ["isOnline"] = 0;
+                audio_location = request.POST.get("localfile", None);
+                audio_url = upload_assemblyai(request.FILES["localfile"]); #upload to AssemblyAI
+                audio_location = request.FILES["localfile"]; #<class 'django.core.files.uploadedfile.InMemoryUploadedFile'>
+                #context["videoContent"] = audio_location #still <class 'django.core.files.uploadedfile.InMemoryUploadedFile'>
+                #print('type(context["videoContent"]): ', type(context["videoContent"]));
+                audio_location = audio_location.temporary_file_path;
+                print("audio_location.temporary_file_path:", audio_location.temporary_file_path);
+            else:
+                audio_url = audio_location;
             
+            ##request production of a transcript
+            #transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
+            
+            #save video's original location, plus its transcript
+            p = Video(location=audio_location, transcriptID=transcriptID);
+            p.save();
+        
         dbWords = query_transcript(transcriptID, auth); #list of dictionaries; one per word
         dbWordToTimes = map_word_to_times(dbWords, 2);
         
-    context["videoURL"] = audio_url;
-        
+    context["videoURL"] = audio_location;
+    
     return render(request, 'query_video.html', context);
+
+def query_local(request):
+    #audio_local = '/Users/vdo/Documents/Jeffrey/CMU/Courses/2021T2/49783/project/testData/LectureIntro.mp4';
+    #auth = "9ce7bcff260346dcb2810fa76023732b";
+    #headers = {'authorization': auth};
+    #response = requests.post('https://api.assemblyai.com/v2/upload',
+    #                     headers=headers,
+    #                     data=read_file(audio_local));
+    #print(response.json()); #{'upload_url': 'https://cdn.assemblyai.com/upload/d81401ab-87c6-4d4d-a22f-b8a664aa3f8c'}
+    return render(request, 'query_local.html');
+
+def getJSONTranscripts(request):
+    return "test";

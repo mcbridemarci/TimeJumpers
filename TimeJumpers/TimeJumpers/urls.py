@@ -22,7 +22,9 @@ urlpatterns = [
     path('', views.index, name="Homepage"),
     path('specify/', views.specify, name="Specify"),
     path('query/', views.query_video, name="Query"),
+    path('queryLocal/', views.query_local, name="Query"),
     path('testDBWrite/', views.testDBWrite, name="testDBWrite"),
     path('testTimeJump/', views.testTimeJump, name="testTimeJump"),
     path('testLocalVideo/', views.testLocalVideo, name="testLocalVideo"),
+    path('getJSONTranscripts/', views.getJSONTranscripts, name="(none)")
 ]
