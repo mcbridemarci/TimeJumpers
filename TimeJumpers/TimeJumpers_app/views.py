@@ -28,8 +28,6 @@ def login(request):
             p.save();
         else: #opening an existing account
             currUser = User.objects.get(email=email);
-            print("currUser.password:", currUser.password);
-            print("pwHash:", pwHash);
             if currUser and str(pwHash) == currUser.password: #compare_digest(currUser.password, pwHash):
                 context["userID"] = currUser.id;
                 return specify(request, currUser.id); #TODO: redirect such that the URL is not "/login"
@@ -104,12 +102,12 @@ def query_transcript(transcriptID: str, auth: str) -> dict:
         if not dbWords:
             time.sleep(5);
         else:
-            print(dbWords);
+            #print(dbWords);
             dbWords = dbWords['words'];
     
     return dbWords;
     
-#does not work for partial matches - I cannot anticipate every last keyword the crazy use might search!
+#can be searched even for partial matches!
 def map_word_to_times(dbWords: list[dict], context: int) -> dict:
     #dbWords: list of dictionaries like "{'text': 'Hello,', 'confidence': 0.96, 'end': 600, 'start': 0}"
     #r: list of dictionaries like "{'hello': [[0, 'Hello everyone how']]}"
@@ -119,7 +117,6 @@ def map_word_to_times(dbWords: list[dict], context: int) -> dict:
         if key not in r:
             r[key] = [];
         r[key].append([dbWords[i]['start'], " ".join([("{}" if j!=i else "<strong>{}</strong>").format(dbWords[j]['text']) for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
-        #r[key].append([dbWords[i]['start'], " ".join([dbWords[j]['text'] for j in range(max(0,i-context),min(i+context+1,len(dbWords)))])]);
     return r;
     
 #scan trancript for given keyword; return times where found, and surrounding words for context

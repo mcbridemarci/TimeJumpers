@@ -1,0 +1,120 @@
+<h1>Query Local Video</h1>
+<div id="message">Select a video, or there will be no video!</div>
+<input id="JSONContent" value="(none)" style="visibility:hidden"></br>
+<input id="selectVideo" style="visibility:visible" type="file" accept="video/*" /></br>
+<label for='searchWord' id='lblSearchWord' style='visibility:hidden'>Enter word to find:</label>
+<input id='searchWord' type='text' name='searchWord' style="visibility:hidden">
+<button onclick="confirm()">Confirm</button></br>
+<div id="results"></div>
+</br>
+<video controls autoplay id="vid1" style="visibility:hidden"></video></br>
+
+<div></div>
+<script>
+    function confirm(){
+        //alert("jsonContent.value?");
+        var vidSel = document.getElementById('selectVideo');
+        var vidPlay = document.getElementById('vid1');
+        var jsonContent = document.getElementById('JSONContent');
+        //this if-statement causes everything to fail; fix it!
+        if (jsonContent.value === "(none)") {
+            alert("uploading and analyzing...");
+            
+            //simulate successful AJAX call to AssemblyAI (note that JSON MUST use double quotes)
+            jsonContent.value = '[{"text": "Hello,", "confidence": 0.96, "end": 600, "start": 0}, {"text": "everyone.", "confidence": 0.95, "end": 1200, "start": 610}, {"text": "How", "confidence": 0.99, "end": 2940, "start": 1940}, {"text": "are", "confidence": 0.91, "end": 3150, "start": 2950}, {"text": "you.", "confidence": 0.88, "end": 3330, "start": 3160}]';
+            
+            //**** remainder to be run after successful AJAX call: ****
+            vidSel.style.visibility="hidden";
+            vidPlay.style.visibility="visible";
+            document.getElementById('lblSearchWord').style.visibility="visible";
+            document.getElementById('searchWord').style.visibility="visible";
+            
+            //analyzeLocalFile: vidSel.files[0]
+            /**$.ajax({
+                //data: vidSel.files[0],
+                data: [],
+                url: "/getJSONTranscripts",
+                // on success
+                success: function (response) {
+                    //vidSel.style.visibility="hidden";
+                    //vidPlay.style.visibility="visible";
+                    //document.getElementById('lblSearchWord').style.visibility="visible";
+                    //document.getElementById('searchWord').style.visibility="visible";
+                    alert(response);
+                },
+                // on error
+                error: function (response) {
+                    // alert the error if any error occured
+                    console.log(response.responseJSON.errors)
+                }
+            }**/
+        }
+        else {
+            
+            //alert("search: " + document.getElementById('searchWord').value);
+            var searchWord = document.getElementById('searchWord').value;
+            const transcript = JSON.parse(jsonContent.value.toLowerCase(), function (key, value) {
+              return value;
+            });
+            //alert("transcript.length: " + transcript.length);
+            var str = "";
+            for(let i=0; i<transcript.length; i++){
+                //alert(transcript[i].text + "; " + transcript[i].text.includes(searchWord));
+                if (transcript[i].text.includes(searchWord)){
+                    var startTime = transcript[i].start/1000;
+                    str += '<li><a href="javascript:setVideoTime(' + startTime.toString() + ')">0:00:00</a>: ...';
+                    for(let j=-2; j<3; j++){ //include 2 words of context on each side
+                        if (j === 0){
+                            str += " <strong>" + transcript[i].text + "</strong>";
+                        }
+                        else if (i + j >= 0 && i + j < transcript.length){
+                            str += " " + transcript[i+j].text;
+                        }
+                    }
+                    str += "...</li>";
+                }
+            }
+            document.getElementById('results').innerHTML = str;
+        }
+    }
+    function setVideoTime(start){
+        vid = document.getElementById('vid1')
+        vid.currentTime = start;
+        vid.play(); //sometimes causes errors
+    }
+
+    
+    (function localFileVideoPlayer() {
+      'use strict'
+      var URL = window.URL || window.webkitURL
+      var displayMessage = function(message, isError) {
+        var element = document.querySelector('#message')
+        element.innerHTML = message
+        element.className = isError ? 'error' : 'info'
+      }
+      var playSelectedFile = function(event) {
+          var file = this.files[0]
+          var videoNode = document.getElementById('vid1')
+            
+          //check if selected file can be played
+          var type = file.type
+          var canPlay = videoNode.canPlayType(type)
+          if (canPlay === '') canPlay = 'no'
+          var message = 'Can play type "' + type + '": ' + canPlay
+          var isError = canPlay === 'no'
+          //displayMessage(message, isError)
+          if (isError) {
+            displayMessage(message, isError)
+            return
+          }
+          
+          var fileURL = URL.createObjectURL(file)
+          videoNode.src = fileURL
+          videoNode.pause();
+          videoNode.currentTime = 0;
+      }
+      var inputNode = document.getElementById('selectVideo')
+      inputNode.addEventListener('change', playSelectedFile, false)
+    })()
+
+</script>

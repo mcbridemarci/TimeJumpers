@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<head>
+    <title>{{title}}</title>
+    <p>{{error}}</p>
+</head>
+<body>
+    <form id="frmLogin" action="../login/" method="POST" enctype = "multipart/form-data">
+        {% csrf_token %}
+        <label for="action">Action:</label>
+        <select id="action" class="combo" name="action">
+            <option value="login" selected="true">Login</option>
+            <option value="create">Create Account</option>
+        </select><br/>
+        </br>
+        <label for="email">Email:</label>
+        <input id="email" type="text" name="email"></br>
+        </br>
+        <label for="password">Password:</label>
+        <input id="password" type="text" name="password"></br>
+        </br>
+        <a onclick="document.getElementById('frmLogin').submit();">Confirm</a>
+    </form>
+</body>
+</html>
+
