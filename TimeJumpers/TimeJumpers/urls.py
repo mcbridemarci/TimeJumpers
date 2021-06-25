@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name="Homepage"),
     path('specify/', views.specify, name="Specify"),
+    path('login/', views.login, name="Login"),
     path('query/', views.query_video, name="Query"),
     path('queryLocal/', views.query_local, name="Query"),
     path('testDBWrite/', views.testDBWrite, name="testDBWrite"),

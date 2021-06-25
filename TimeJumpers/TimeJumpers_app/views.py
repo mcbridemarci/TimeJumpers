@@ -1,9 +1,43 @@
 from django.shortcuts import render;
 from django.http import HttpResponse;
-from TimeJumpers_app.models import Video;
-import io, requests, json, math, random;
+from TimeJumpers_app.models import User, Video;
+from hmac import compare_digest #testing...
+import io, requests, json, math, random, hashlib;
 currentAudio = "";
 dbWordToTimes = {};
+
+def local_hash(password: str):
+    hashery = hashlib.sha256()
+    hashery.update(bytes(password, 'utf-8'));
+    return hashery.digest();
+
+def login(request):
+    context = {};
+    if "email" not in request.POST: #render login page
+        context["title"] = "Login";
+    else: #input sent
+        context["title"] = "Login";
+        
+        #get email and hash password
+        email = request.POST.get("email");
+        pwHash = local_hash(request.POST.get("password"));
+        
+        #if creating a new user
+        if request.POST.get("action")=="create":
+            p = User(email=email, password=pwHash);
+            p.save();
+        else: #opening an existing account
+            currUser = User.objects.get(email=email);
+            print("currUser.password:", currUser.password);
+            print("pwHash:", pwHash);
+            if currUser and str(pwHash) == currUser.password: #compare_digest(currUser.password, pwHash):
+                context["userID"] = currUser.id;
+                return specify(request, currUser.id); #TODO: redirect such that the URL is not "/login"
+            else:
+                context["error"] = "The credentials provided could not be verified. Try again.";
+            
+    return render(request, 'login.html', context);
+    
 
 #POC: test jumping to a random point in the video
 def testTimeJump(request):
@@ -66,9 +100,12 @@ def query_transcript(transcriptID: str, auth: str) -> dict:
         response = requests.get(endpoint, headers=headers);
         
         #return response.json();
-        dbWords = response.json()['words'];
+        dbWords = response.json();
         if not dbWords:
             time.sleep(5);
+        else:
+            print(dbWords);
+            dbWords = dbWords['words'];
     
     return dbWords;
     
@@ -101,9 +138,11 @@ def index(request):
     return render(request, 'index.html');
 
 #landing page
-def specify(request):
+def specify(request, userID=0):
     context = { };
-    context ["existing_videos"] = Video.objects.all();
+    context ["existing_videos"] = Video.objects.filter(userID=userID);
+    context["userID"] = userID;
+     #context ["existing_videos"] = Video.objects.all();
     return render(request, 'specify_video.html', context);
     
 #pad strIn with as many copies of strPad as is required to reach a length of iLen
@@ -159,6 +198,7 @@ def query_video(request):
     global dbWordToTimes;
     context = {}; #container to send data to the view
     audio_location = "";
+    userID = request.POST.get("userID", None) if "userID" in request.POST else 0;
     
     if "searchWord" in request.POST: #no need to query transcription as we already have it in memory
         searchWord = request.POST.get("searchWord", None).lower();
@@ -189,21 +229,22 @@ def query_video(request):
                 #context["videoContent"] = audio_location #still <class 'django.core.files.uploadedfile.InMemoryUploadedFile'>
                 #print('type(context["videoContent"]): ', type(context["videoContent"]));
                 audio_location = audio_location.temporary_file_path;
-                print("audio_location.temporary_file_path:", audio_location.temporary_file_path);
+                #print("audio_location.temporary_file_path:", audio_location.temporary_file_path);
             else:
                 audio_url = audio_location;
             
-            ##request production of a transcript
-            #transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
+            #request production of a transcript
+            transcriptID = transcribe_assemblyai(auth, audio_url)['id'];
             
             #save video's original location, plus its transcript
-            p = Video(location=audio_location, transcriptID=transcriptID);
+            p = Video(location=audio_location, transcriptID=transcriptID, userID=userID);
             p.save();
         
         dbWords = query_transcript(transcriptID, auth); #list of dictionaries; one per word
         dbWordToTimes = map_word_to_times(dbWords, 2);
-        
+                
     context["videoURL"] = audio_location;
+    context["userID"] = userID;
     
     return render(request, 'query_video.html', context);
 

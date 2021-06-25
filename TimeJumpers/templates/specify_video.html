@@ -1,4 +1,3 @@
-<!-- bring in search results in a model -->
 <!DOCTYPE html>
 <head>
     <title>Specify</title>
@@ -18,6 +17,7 @@
         <br/>
         <label for="videoLocation">Enter URL of public video:</label></br>
         <input id="videoLocation" type="text" name="videoLocation">
+        <input type="hidden" id="userID" name="userID" value="{{ userID }}">
     </form></br>
     <button onclick="confirmVideo()">Confirm</button>
     <br/>

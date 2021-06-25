@@ -17,6 +17,7 @@
     <form action='.' method='POST'>
         {% csrf_token %}
         <input type="hidden" id="videoURL" name="videoURL" value="{{ videoURL }}">
+        <input type="hidden" id="userID" name="userID" value="{{ userID }}">
         <label for='searchWord'>Enter word to find:</label></br>
         <input id='searchWord' type='text' name='searchWord' value='{{ searchWord }}'><input type='submit' value='Search'>
     </form>
