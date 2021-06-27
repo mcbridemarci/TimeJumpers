@@ -3,6 +3,12 @@ from django.http import HttpResponse;
 from TimeJumpers_app.models import User, Video;
 from hmac import compare_digest #testing...
 import io, requests, json, math, random, hashlib;
+
+#from dajaxice.utils import deserialize_form;
+##from myapp.form import DreamrealForm;
+#from dajax.core import Dajax;
+##from myapp.models import Dreamreal;
+
 currentAudio = "";
 dbWordToTimes = {};
 
@@ -238,6 +244,7 @@ def query_video(request):
             p.save();
         
         dbWords = query_transcript(transcriptID, auth); #list of dictionaries; one per word
+        print(dbWords);
         dbWordToTimes = map_word_to_times(dbWords, 2);
                 
     context["videoURL"] = audio_location;
@@ -246,6 +253,17 @@ def query_video(request):
     return render(request, 'query_video.html', context);
 
 def query_local(request):
+    #test = ;
+    #testList = test.split("text");
+    
+    #for item in testList:
+    #    if item.count('"')!=10:
+    #        print(item);
+    
+    #for i in range(1, len(test)-1):
+    #    if test[i]=='"' and test[i-1].isalnum() and test[i+1].isalnum():
+    #        print(test[i-10:i+10]);
+    
     #audio_local = '/Users/vdo/Documents/Jeffrey/CMU/Courses/2021T2/49783/project/testData/LectureIntro.mp4';
     #auth = "9ce7bcff260346dcb2810fa76023732b";
     #headers = {'authorization': auth};
@@ -255,5 +273,6 @@ def query_local(request):
     #print(response.json()); #{'upload_url': 'https://cdn.assemblyai.com/upload/d81401ab-87c6-4d4d-a22f-b8a664aa3f8c'}
     return render(request, 'query_local.html');
 
+#@dajaxice_register
 def getJSONTranscripts(request):
     return "test";

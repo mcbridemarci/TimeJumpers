@@ -16,6 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from TimeJumpers_app import views
+#from .dajaxice.core import dajaxice_autodiscover, dajaxice_config
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,3 +32,8 @@ urlpatterns = [
     path('testLocalVideo/', views.testLocalVideo, name="testLocalVideo"),
     path('getJSONTranscripts/', views.getJSONTranscripts, name="(none)")
 ]
+
+#urlpatterns += patterns('',
+#   url(r'^%s/' % settings.DAJAXICE_MEDIA_PREFIX, include('dajaxice.urls')),)
+    
+urlpatterns += staticfiles_urlpatterns()
