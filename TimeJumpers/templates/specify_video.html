@@ -6,6 +6,7 @@
     Specify previous video: <br/>
     <form id="frmSpecifyVideo" action="../query/" method="POST" enctype = "multipart/form-data">
         {% csrf_token %}
+        {% if userID != 0 %}
         <select id="existing" class="combo" name="existing">
             <option value="" selected="true">Please Select</option>
             {% for v in existing_videos %}
@@ -15,6 +16,7 @@
         <br/>
         - OR -<br/>
         <br/>
+        {% endif %}
         <label for="videoLocation">Enter URL of public video:</label></br>
         <input id="videoLocation" type="text" name="videoLocation">
         <input type="hidden" id="userID" name="userID" value="{{ userID }}">

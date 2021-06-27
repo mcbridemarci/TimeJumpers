@@ -140,11 +140,12 @@ def findAll(searchword: str, dbWordToTimes: dict) -> list[int]:
 def index(request):
     return render(request, 'index.html');
 
-#landing page
+#specify video to use
 def specify(request, userID=0):
     context = { };
-    context ["existing_videos"] = Video.objects.filter(userID=userID);
     context["userID"] = userID;
+    if userID != 0:
+        context ["existing_videos"] = Video.objects.filter(userID=userID);
      #context ["existing_videos"] = Video.objects.all();
     return render(request, 'specify_video.html', context);
     
