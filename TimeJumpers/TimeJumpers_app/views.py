@@ -250,8 +250,9 @@ def query_video(request):
                 
     context["videoURL"] = audio_location;
     context["userID"] = userID;
-    
-    return render(request, 'query_video.html', context);
+        
+    return render(request, 'play.html', context);
+    #return render(request, 'query_video.html', context);
 
 def query_local(request):
     #test = ;
@@ -272,6 +273,7 @@ def query_local(request):
     #                     headers=headers,
     #                     data=read_file(audio_local));
     #print(response.json()); #{'upload_url': 'https://cdn.assemblyai.com/upload/d81401ab-87c6-4d4d-a22f-b8a664aa3f8c'}
+    #return render(request, 'query_local.html');
     return render(request, 'query_local.html');
 
 #@dajaxice_register
