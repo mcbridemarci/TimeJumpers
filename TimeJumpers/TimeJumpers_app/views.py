@@ -245,7 +245,7 @@ def query_video(request):
             p.save();
         
         dbWords = query_transcript(transcriptID, auth); #list of dictionaries; one per word
-        print(dbWords);
+        #print(dbWords);
         dbWordToTimes = map_word_to_times(dbWords, 2);
                 
     context["videoURL"] = audio_location;
