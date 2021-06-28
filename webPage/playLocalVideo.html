@@ -1,0 +1,100 @@
+<!doctype html>
+<!-- Bootstrap v5.0.1 (https://getbootstrap.com/) -->
+<html class="h-100" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="" name="description"/>
+    <meta content="Marci McBride" name="author"/>
+    <title>Local Upload</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Favicon-->
+    <link href="assets/favicon.ico" rel="icon" type="image/x-icon"/>
+    <!-- Font Awesome icons (free version)-->
+    <script crossorigin="anonymous" src="https://use.fontawesome.com/releases/v5.15.3/js/all.js"></script>
+    <!-- Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" type="text/css"/>
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles.css" rel="stylesheet"/>
+</head>
+
+<body class="d-flex h-100 text-center bg-dark" id="page-top">
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <!-- Navigation-->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+        <div class="container">
+            <div class="navbar-brand" href="index.html">Time Jumpers</div>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="./index.html">Home</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <section class="px-3 text-white" id="masthead">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h1>Results</h1>
+                <p class="text-white" id="message"></p>
+            </div>
+            <div class="col-md-12 mb-5">
+                <input class="marcibox" type="file" accept="video/*"/>
+            </div>
+            <div class="col-md-12 mb-5">
+                <video controls autoplay></video>
+            </div>
+            <div class="col-md-12">
+                <div>{{json}}</div>
+            </div>
+        </div>
+</div>
+</section>
+<footer class="mt-auto text-white-50">
+    <p>
+        <a class="btn btn-light btn-social mx-2" href="https://github.com/mcbridemarci/TimeJumpers"><i
+                class="fab fa-gitlab"></i></a>
+    </p>
+</footer>
+</div>
+</body>
+</html>
+
+
+<script>
+(function localFileVideoPlayer() {
+  'use strict'
+  var URL = window.URL || window.webkitURL
+  var displayMessage = function(message, isError) {
+    var element = document.querySelector('#message')
+    element.innerHTML = message
+    element.className = isError ? 'error' : 'info'
+  }
+  var playSelectedFile = function(event) {
+    var file = this.files[0]
+    var type = file.type
+    var videoNode = document.querySelector('video')
+    var canPlay = videoNode.canPlayType(type)
+    if (canPlay === '') canPlay = 'no'
+    var message = 'Can play type "' + type + '": ' + canPlay
+    var isError = canPlay === 'no'
+    displayMessage(message, isError)
+
+    if (isError) {
+      return
+    }
+
+    var fileURL = URL.createObjectURL(file)
+    videoNode.src = fileURL
+  }
+  var inputNode = document.querySelector('input')
+  inputNode.addEventListener('change', playSelectedFile, false)
+})()
+
+
+
+</script>
+
+

@@ -48,7 +48,11 @@
     scroll-behavior: smooth;
   }
 }
-
+.video {
+  flex: 0 0 auto;
+  width:320;
+  height:240;
+}
 body {
   margin: 0;
   font-family: "Roboto Slab", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -172,7 +176,15 @@ dd {
   margin-bottom: 0.5rem;
   margin-left: 0;
 }
+.info {
+  background-color: yellow;
+  color: black;
+}
 
+.error {
+  background-color: red;
+  color: white;
+}
 blockquote {
   margin: 0 0 1rem;
 }
