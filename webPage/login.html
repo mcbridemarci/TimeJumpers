@@ -1,0 +1,93 @@
+<!doctype html>
+<!-- Bootstrap v5.0.1 (https://getbootstrap.com/) -->
+<html class="h-100" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="" name="description"/>
+    <meta content="Marci McBride" name="author"/>
+    <title>{{title}}</title>
+    <p>{{error}}</p>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Favicon-->
+    <link href="assets/favicon.ico" rel="icon" type="image/x-icon"/>
+    <!-- Font Awesome icons (free version)-->
+    <script crossorigin="anonymous" src="https://use.fontawesome.com/releases/v5.15.3/js/all.js"></script>
+    <!-- Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" type="text/css"/>
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles.css" rel="stylesheet"/>
+</head>
+
+<body class="d-flex h-100 text-center bg-dark" id="page-top">
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <!-- Navigation-->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+        <div class="container">
+            <div class="navbar-brand" href="index.html">Time Jumpers</div>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="./index.html">Home</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <header class="mb-auto">
+        <div>
+            <h3 class="float-md-start mb-0">Time Jumper</h3>
+        </div>
+    </header>
+
+    <section class="px-3 text-white page-section" id="contact">
+        <div class="container ">
+            <div class="text-center">
+                <h2 class="my-3 section-heading text-uppercase">Login</h2>
+                <p class="text-muted">Login to save your videos and view upload history</p>
+            </div>
+            <form id="frmLogin" action="../login/" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row align-items-stretch mb-5">
+                    <div class="col-md-12">
+                        <div class="form-group mb-4">
+                            <label for="action">Action:</label>
+                            <select class="marcibox" id="action" class="combo" name="action">
+                                <option value="login" selected="true">Login</option>
+                                <option value="create">Create Account</option>
+                            </select>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="email">Email: </label>
+                            <input class="marcibox" id="email" type="text" name="email">
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="password">Password:</label>
+                            <input class="marcibox" id="password" type="text" name="password">
+                        </div>
+
+                        <div class="text-center text-white mb-3">
+                            <a onclick="document.getElementById('frmLogin').submit();"
+                               class=" my-3 btn btn-primary btn-xl text-dark text-uppercase">Confirm</a>
+                            <p class="text-muted"><a class="nav-link" href="./specify_video.html">Continue as Guest</a></p>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </section>
+
+    <footer class="mt-auto text-white-50">
+        <p>
+            <a class="btn btn-light btn-social mx-2" href="https://github.com/mcbridemarci/TimeJumpers"><i
+                    class="fab fa-gitlab"></i></a>
+        </p>
+    </footer>
+</div>
+</body>
+</html>
+
+
