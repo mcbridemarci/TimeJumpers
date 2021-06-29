@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<head>
+    <title>Specify</title>
+</head>
+<body>
+    Specify previous video: <br/>
+    <form id="frmSpecifyVideo" action="../query/" method="POST" enctype = "multipart/form-data">
+        {% csrf_token %}
+        {% if userID != 0 %}
+        <select id="existing" class="combo" name="existing">
+            <option value="" selected="true">Please Select</option>
+            {% for v in existing_videos %}
+                <option value="{{v.transcriptID}}">{{v.location}}</option>
+            {% endfor %}
+        </select><br/>
+        <br/>
+        - OR -<br/>
+        <br/>
+        {% endif %}
+        <label for="videoLocation">Enter URL of public video:</label></br>
+        <input id="videoLocation" type="text" name="videoLocation">
+        <input type="hidden" id="userID" name="userID" value="{{ userID }}">
+    </form></br>
+    <button onclick="confirmVideo()">Confirm</button>
+    <br/>
+    <br/>
+    - OR -<br/>
+    <br/>
+    <form id="frmGoLocal" action="../queryLocal/" method="POST" enctype = "multipart/form-data">
+        {% csrf_token %}
+        <label for="localfile">Select video stored locally</label></br>
+        <button onclick="localVideoInterface()">Go Local!</button>
+    </form>
+    </br>
+    </br>
+    </br>
+    <video controls autoplay style="visibility:hidden"></video>
+    <script>
+        function confirmVideo() {
+            if (document.getElementById("existing").value + document.getElementById("videoLocation").value != ""){
+                document.getElementById("frmSpecifyVideo").submit();
+            }
+            else{
+                alert("Please fill one field to specify a video.");
+            }
+        }
+        function localVideoInterface() {
+            document.getElementById("frmGoLocal").submit();
+        }
+    </script>
+</body>
+</html>
+
