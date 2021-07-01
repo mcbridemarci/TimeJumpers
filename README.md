@@ -2,15 +2,6 @@
 
 Time jumper was created as a one-stop application to help you navigate faster. We give users the ability to log in and upload local videos or specify links of videos stored within AWS or google cloud storage. Our users can then search for keywords and click on the results to navigate or “JUMP” through the video.
 
-## Cloud Architecture Diagram
-![Image of Cloud Architecture](https://github.com/mcbridemarci/TimeJumpers/images/Arch2.png)
-
-## Application Architecture Diagram 
-![Image of Application Architecture](https://github.com/mcbridemarci/TimeJumpers/images/Arch1.png)
-
-## Process Flow Diagram 
-![Image of Process Flow](https://github.com/mcbridemarci/TimeJumpers/images/Arch3.png)
-
 ## Environment Setup 
 
 ```
@@ -48,8 +39,18 @@ Add Security group for database such that it is accessible only from the EC2.[sn
 Install Pgadmin to view your data locally as you will not be able to query data from the AWS console. 
 ```
 
+## Cloud Architecture Diagram
+![Image of Cloud Architecture](https://github.com/mcbridemarci/TimeJumpers/blob/main/images/Arch2.png)
+
+## Application Architecture Diagram 
+![Image of Application Architecture](https://github.com/mcbridemarci/TimeJumpers/blob/main/images/Arch1.png)
+
+## Process Flow Diagram 
+![Image of Process Flow](https://github.com/mcbridemarci/TimeJumpers/blob/main/images/Arch3.png)
+
+
 ### Authors 
-Jeffrey McIntosh 
-Marci McBride
-Akshaya Kumar 
-Sukarma Parimoo  
+* Jeffrey McIntosh 
+* Marci McBride
+* Akshaya Kumar 
+* Sukarma Parimoo  
