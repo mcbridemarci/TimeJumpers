@@ -8,7 +8,6 @@
     <meta content="" name="description"/>
     <meta content="Marci McBride" name="author"/>
     <title>{{title}}</title>
-    <p>{{error}}</p>
 
     <!-- Bootstrap core CSS -->
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
@@ -72,6 +71,7 @@
                                 <input type="checkbox" onclick="myFunction()">  Show Password
                             </h5>
                         </div>
+                        <p style='color:red'>{{error}}</p>
 
                         <div class="text-center text-white mb-3">
                             <a onclick="document.getElementById('frmLogin').submit();"

@@ -30,13 +30,16 @@ def login(request):
         
         #if creating a new user
         if request.POST.get("action")=="create":
-            p = User(email=email, password=pwHash);
-            p.save();
+            if not User.objects.filter(email=email).count():
+                p = User(email=email, password=pwHash);
+                p.save();
+            else:
+                context["error"] = "The email address provided is already in use. Provide another.";
         else: #opening an existing account
-            currUser = User.objects.get(email=email);
-            if currUser and str(pwHash) == currUser.password: #compare_digest(currUser.password, pwHash):
-                context["userID"] = currUser.id;
-                return specify(request, currUser.id); #TODO: redirect such that the URL is not "/login"
+            currUser = User.objects.filter(email=email);
+            if currUser and str(pwHash) == currUser[0].password: #compare_digest(currUser.password, pwHash):
+                context["userID"] = currUser[0].id;
+                return specify(request, currUser[0].id); #TODO: redirect such that the URL is not "/login"
             else:
                 context["error"] = "The credentials provided could not be verified. Try again.";
             
