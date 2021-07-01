@@ -1,4 +1,3 @@
-{% load static %}
 <!doctype html>
 <!-- Bootstrap v5.0.1 (https://getbootstrap.com/) -->
 <html class="h-100" lang="en">
@@ -10,16 +9,16 @@
     <title>Local Upload</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet"/>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
     <!-- Favicon-->
-    <link href="{% static 'assets/favicon.ico' %}" type="image/x-icon"/>
+    <link href="assets/favicon.ico" rel="icon" type="image/x-icon"/>
     <!-- Font Awesome icons (free version)-->
     <script crossorigin="anonymous" src="https://use.fontawesome.com/releases/v5.15.3/js/all.js"></script>
     <!-- Google fonts-->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css"/>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" type="text/css"/>
     <!-- Core theme CSS (includes Bootstrap)-->
-    <link href="{% static 'css/styles.css' %}" rel="stylesheet"/>
+    <link href="css/styles.css" rel="stylesheet"/>
 </head>
 
 <body class="d-flex h-100 text-center bg-dark" id="page-top">
@@ -30,7 +29,7 @@
             <div class="navbar-brand" href="index.html">Time Jumpers</div>
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="../">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="./index.html">Home</a></li>
                 </ul>
             </div>
         </div>
@@ -135,12 +134,12 @@
         }
         else {
             
-            //get transcript
+            //alert("search: " + document.getElementById('searchWord').value);
             var searchWord = document.getElementById('searchWord').value;
             const transcript = JSON.parse(jsonContent.value.toLowerCase(), function (key, value) {
               return value;
             });
-            //collect search results
+            //alert("transcript.length: " + transcript.length);
             var str = "";
             for(let i=0; i<transcript.length; i++){
                 //alert(transcript[i].text + "; " + transcript[i].text.includes(searchWord));
@@ -157,10 +156,6 @@
                     }
                     str += "...</li>";
                 }
-            }
-            //if no results, inform user that we tried
-            if (str.length==0){
-                str = "<li>No results found for <strong>'" + searchWord + "'</strong></li>";
             }
             document.getElementById('results').innerHTML = str;
         }

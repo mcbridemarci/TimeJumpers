@@ -1,7 +1,7 @@
 from django.shortcuts import render;
 from django.http import HttpResponse;
 from TimeJumpers_app.models import User, Video;
-from hmac import compare_digest #testing...
+#from hmac import compare_digest #testing...
 import io, requests, json, math, random, hashlib;
 
 #from dajaxice.utils import deserialize_form;
